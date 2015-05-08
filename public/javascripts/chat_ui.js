@@ -9,7 +9,7 @@ function divSystemContentElement(message) {
 function processUserInput(chatApp, socket) {
   var message = $('#send-message').val()
     , systemMessage;
-
+  console.log('the message is: ' + message);
   // If user input begins with a slash, treat it as a command
   if (message[0] == '/') {
     systemMessage = chatApp.processCommand(message);
@@ -27,7 +27,7 @@ function processUserInput(chatApp, socket) {
   $('#send-message').val('');
 }
 
-var socket = io.connect();
+var socket = io.connect('http://127.0.0.1:4000');
 
 $(document).ready(function() {
   var chatApp = new Chat(socket);
@@ -35,7 +35,7 @@ $(document).ready(function() {
   // Display the results of a name change attempt
   socket.on('nameResult', function(result) {
     var message;
-
+    console.log(result);
     if (result.success) {
       message = 'You are now known as ' + result.name + '.';
     } else {
@@ -56,6 +56,35 @@ $(document).ready(function() {
     var newElement = $('<div></div>').text(message.text);
     $('#messages').append(newElement);
   });
+
+
+  socket.on('coordinateChanged', function (message) {
+    console.log(message);
+  });
+
+  socket.on('contactOnline', function (message) {
+    console.log(message);
+  });
+
+  // handle a user going offline
+  socket.on('userOffline', function (user) {
+    console.log('user logged off - ' + user.name);
+    console.log(user);
+    // remove the user from the list?
+  });
+
+
+  // Display the initial list of folks who are being tracked
+  socket.on('folksOnline', function (message) {
+    console.log(message);
+    var trackedpeople = [];
+    var folksOnline = message.folksOnline;
+    for(var propName in folksOnline){
+      trackedpeople.push({name: folksOnline[propName].name, coordinates: folksOnline[propName].coordinates});
+    }
+    console.log(trackedpeople);
+  });
+
 
   // Display list of rooms available
   socket.on('rooms', function(rooms) {

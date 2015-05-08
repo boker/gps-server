@@ -18,7 +18,7 @@ Chat.prototype.changeRoom = function(room) {
 };
 
 Chat.prototype.processCommand = function(command) {
-
+  console.log('inside command processor');
   var words = command.split(' ')
     // Parse command from first word
     , command = words[0].substring(1, words[0].length).toLowerCase()
@@ -34,9 +34,21 @@ Chat.prototype.processCommand = function(command) {
 
     // Handle name change attempts
     case 'nick':
+      console.log('inside nick processor!');
       words.shift();
-      var name = words.join(' ');
-      this.socket.emit('nameAttempt', name);
+      var param = words.join(' ');
+      words = param.split('|');
+      var name = words[0];
+      var coordinates= words[1].split(':');
+      this.socket.emit('enrollForTracking', {name: name, coordinates: {x: coordinates[0], y: coordinates[1]}});
+      break;
+
+    // Handle name change attempts
+    case 'coord':
+      console.log('inside coord processor!');
+      words.shift();
+      var coordinates = words.join(' ').split(':');
+      this.socket.emit('changeCoordinates', {x: coordinates[0], y: coordinates[1]});
       break;
 
     // Return an error message if the command isn't recognized
